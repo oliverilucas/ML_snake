@@ -1,26 +1,43 @@
-import pygame, sys
-import numpy as np
+from piezas import piezaI, piezaJ, piezaL, piezaO, piezaS, piezaT, piezaZ
+import pygame, sys, numpy as np
 from pygame.locals import *
 
 pygame.init()
 
 #Parámetros de juego
-grid_game = np.zeros((20,10))
-blockSize = 30 #Set the size of the grid block
+grid_game = []
+blockSize = 30 
 MARGIN = 2
+
+#Crea la grilla
+for _ in range (0,20):
+    rowlist = []
+    for _ in range (0,10):
+        rowlist.append(0)
+    grid_game.append(rowlist)
 
 #Parámetros de pantalla
 WINDOW_HEIGHT = (blockSize + MARGIN) * 20 + MARGIN #alto
 WINDOW_WIDTH = (blockSize + MARGIN) * 10 + MARGIN #ancho
 SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Tetris")
-grid_game[1][1] = 1
 
 #Colores
 WHITE = pygame.Color(255,255,255)
 BLACK = pygame.Color(0,0,0)
 GREEN = pygame.Color(155,102,75)
-velocidad = 50
+
+piezaL(grid_game)
+
+#Mueve la pantalla en una fila.
+def downGrid():
+    grid_game.insert(0, [0] * 10)
+    grid_game.pop(20)
+
+def leftGrid():
+    grid_game.insert(0, [0] * 10)
+    grid_game.pop(20)
+
 
 def drawGrid():
     for row in range(20):
@@ -50,7 +67,7 @@ while True:
             elif event.key ==K_UP:
                 pass
             elif event.key ==K_DOWN:
-                pass
+                downGrid()
     
     SCREEN.fill(BLACK)
     drawGrid()
