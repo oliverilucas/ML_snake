@@ -15,6 +15,7 @@ for _ in range (0,20):
     for _ in range (0,10):
         rowlist.append(0)
     grid_game.append(rowlist)
+grid_game = np.array(grid_game)
 
 #Parámetros de pantalla
 WINDOW_HEIGHT = (blockSize + MARGIN) * 20 + MARGIN #alto
@@ -30,14 +31,23 @@ GREEN = pygame.Color(155,102,75)
 piezaL(grid_game)
 
 #Mueve la pantalla en una fila.
-def downGrid():
-    grid_game.insert(0, [0] * 10)
-    grid_game.pop(20)
+def downGrid(grid_game):
+    grid_game = np.insert(grid_game, 0, np.zeros(10), axis=0)
+    grid_game = np.delete(grid_game.reshape((21,10)), 20, axis=0)
+    return grid_game
 
-def leftGrid():
-    grid_game.insert(0, [0] * 10)
-    grid_game.pop(20)
+def rightGrid(grid_game):
+    grid_game = np.insert(grid_game, 0, np.zeros((1,20)), axis=1)
+    grid_game = np.delete(grid_game.reshape((20,11)), 10, axis=1)
+    return grid_game
 
+def leftGrid(grid_game):
+    grid_game = np.insert(grid_game, 10, np.zeros((1,20)), axis=1)
+    grid_game = np.delete(grid_game.reshape((20,11)), 0, axis=1)
+    return grid_game
+
+def rotate(grid_game):
+    pass
 
 def drawGrid():
     for row in range(20):
@@ -61,13 +71,13 @@ while True:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
             if event.key == K_LEFT:
-                pass
+                grid_game = leftGrid(grid_game)
             elif event.key ==K_RIGHT:
-                pass
+                grid_game = rightGrid(grid_game)
             elif event.key ==K_UP:
                 pass
             elif event.key ==K_DOWN:
-                downGrid()
+                grid_game = downGrid(grid_game)
     
     SCREEN.fill(BLACK)
     drawGrid()
