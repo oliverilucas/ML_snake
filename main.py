@@ -1,4 +1,4 @@
-import pygame, sys, numpy as np
+import pygame, sys, numpy as np, random
 from pygame.locals import *
 
 pygame.init()
@@ -13,11 +13,13 @@ width = 60
 grid = []
 HEAD = (15, 30)
 BODY = [(HEAD[0], HEAD[1]-1), (HEAD[0], HEAD[1]-2), (HEAD[0], HEAD[1]-3), (HEAD[0], HEAD[1]-4), (HEAD[0], HEAD[1]-5)]
+FOOD = ()
 direction = 'right'
+food_status = 1
 
 #Colores
 WHITE = pygame.Color(255,255,255)
-LIGH_WHITE = pygame.Color(239,239,239)
+RED = pygame.Color(255,0,0)
 BLACK = pygame.Color(0,0,0)
 GREEN = pygame.Color(155,102,75)
 
@@ -44,6 +46,8 @@ def drawGrid():
             color = WHITE
             if grid[row][column] == 1:
                 color = GREEN
+            if grid[row][column] == 2:
+                color = RED
             pygame.draw.rect(SCREEN,
                              color,
                              [(MARGIN + blockSize) * column + MARGIN,
@@ -64,10 +68,17 @@ def naturalMove(HEAD, BODY):
         varBODY.append(element)
     return HEAD, varBODY
 
-   
+def food():
+    global food_status
+    global FOOD
+    if food_status == 1:
+        FOOD = (random.randint(0, height-1), random.randint(0, width-1))
+        grid[FOOD[0], FOOD[1]] = 2
+        food_status = 0
+    else:
+        grid[FOOD[0], FOOD[1]] = 2
 
 
-SCREEN = defGrid()
 
 # -------------- Main Program Loop -------------- 
 while True:
@@ -83,7 +94,7 @@ while True:
             elif event.key ==K_RIGHT:
                 direction = 'right'
                 HEAD, BODY = naturalMove(HEAD, BODY)
-                HEAD = (HEAD[0], HEAD[1]+1)  
+                HEAD = (HEAD[0], HEAD[1]+1)
             elif event.key ==K_UP:
                 direction = 'up'
                 HEAD, BODY = naturalMove(HEAD, BODY)
@@ -93,8 +104,9 @@ while True:
                 HEAD, BODY = naturalMove(HEAD, BODY)
                 HEAD = (HEAD[0]+1, HEAD[1])
     
+    SCREEN = defGrid()
     SCREEN.fill(BLACK)
-    defGrid()
+    food()
     drawSnake()
     drawGrid()
 
