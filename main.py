@@ -1,32 +1,48 @@
-import pygame, sys
-import numpy as np
+import pygame, sys, numpy as np
 from pygame.locals import *
 
 pygame.init()
 
-#Parámetros de juego
-grid_game = np.zeros((20,10))
-blockSize = 30 #Set the size of the grid block
-MARGIN = 2
+#Parámetros de grilla
+blockSize = 10 
+MARGIN = 1
+height = 30 
+width = 60
 
-#Parámetros de pantalla
-WINDOW_HEIGHT = (blockSize + MARGIN) * 20 + MARGIN #alto
-WINDOW_WIDTH = (blockSize + MARGIN) * 10 + MARGIN #ancho
-SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption("Tetris")
-grid_game[1][1] = 1
+#Parámetros de juego
+grid = []
+HEAD = (15, 30)
+BODY = [(HEAD[0], HEAD[1]-1), (HEAD[0], HEAD[1]-2), (HEAD[0], HEAD[1]-3), (HEAD[0], HEAD[1]-4), (HEAD[0], HEAD[1]-5)]
+direction = 'right'
 
 #Colores
 WHITE = pygame.Color(255,255,255)
+LIGH_WHITE = pygame.Color(239,239,239)
 BLACK = pygame.Color(0,0,0)
 GREEN = pygame.Color(155,102,75)
-velocidad = 50
+
+def defGrid():
+    global grid
+    grid = []
+    for _ in range (0,height):
+        rowlist = []
+        for _ in range (0,width):
+            rowlist.append(0)
+        grid.append(rowlist)
+    grid = np.array(grid)
+
+    #Parámetros de pantalla
+    WINDOW_HEIGHT = (blockSize + MARGIN) * height + MARGIN #alto
+    WINDOW_WIDTH = (blockSize + MARGIN) * width + MARGIN #ancho
+    SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    pygame.display.set_caption("Snake")
+    return SCREEN
 
 def drawGrid():
-    for row in range(20):
-        for column in range(10):
+    for row in range(height):
+        for column in range(width):
             color = WHITE
-            if grid_game[row][column] == 1:
+            if grid[row][column] == 1:
                 color = GREEN
             pygame.draw.rect(SCREEN,
                              color,
@@ -35,6 +51,23 @@ def drawGrid():
                               blockSize,
                               blockSize])
 
+def drawSnake():
+    global grid
+    grid[HEAD[0], HEAD[1]] = 1
+    for element in BODY:
+        grid[element[0]][element[1]] = 1
+
+def naturalMove(HEAD, BODY):
+    varBODY = []
+    varBODY.append(HEAD)
+    for element in BODY[0:(len(BODY)-1)]:
+        varBODY.append(element)
+    return HEAD, varBODY
+
+   
+
+
+SCREEN = defGrid()
 
 # -------------- Main Program Loop -------------- 
 while True:
@@ -44,17 +77,25 @@ while True:
             sys.exit()
         elif event.type == pygame.KEYDOWN:
             if event.key == K_LEFT:
-                pass
+                direction = 'left'
+                HEAD, BODY = naturalMove(HEAD, BODY)
+                HEAD = (HEAD[0], HEAD[1]-1)
             elif event.key ==K_RIGHT:
-                pass
+                direction = 'right'
+                HEAD, BODY = naturalMove(HEAD, BODY)
+                HEAD = (HEAD[0], HEAD[1]+1)  
             elif event.key ==K_UP:
-                pass
+                direction = 'up'
+                HEAD, BODY = naturalMove(HEAD, BODY)
+                HEAD = (HEAD[0]-1, HEAD[1])
             elif event.key ==K_DOWN:
-                pass
+                direction = 'down'
+                HEAD, BODY = naturalMove(HEAD, BODY)
+                HEAD = (HEAD[0]+1, HEAD[1])
     
     SCREEN.fill(BLACK)
+    defGrid()
+    drawSnake()
     drawGrid()
 
     pygame.display.update()
-
-
