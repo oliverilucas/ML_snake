@@ -10,6 +10,8 @@ height = 30
 width = 60
 
 #Parámetros de juego
+FPS = 20
+fpsClock = pygame.time.Clock()
 grid = []
 HEAD = (15, 30)
 BODY = [(HEAD[0], HEAD[1]-1), (HEAD[0], HEAD[1]-2), (HEAD[0], HEAD[1]-3), (HEAD[0], HEAD[1]-4), (HEAD[0], HEAD[1]-5)]
@@ -59,10 +61,13 @@ def drawGrid():
                               blockSize])
 
 def drawSnake():
-    global grid
-    grid[HEAD[0], HEAD[1]] = 1
-    for element in BODY:
-        grid[element[0]][element[1]] = 1
+    try:
+        global grid
+        grid[HEAD[0], HEAD[1]] = 1
+        for element in BODY:
+            grid[element[0]][element[1]] = 1
+    except:
+        pass
 
 def naturalMove(HEAD, BODY):
     global TAIL
@@ -94,7 +99,13 @@ def scoreboard():
     img = font.render('Score: {0}'.format(score), True, RED)
     SCREEN.blit(img, (3, ((blockSize + MARGIN) * height + MARGIN)+3))
         
-        
+def boundaries():
+    for elements in BODY:
+        if HEAD == elements:
+            raise Exception("¡Perdiste! ¡Chocaste contigo mismo!")
+    
+    if HEAD[0] >= height or HEAD[0] < 0 or HEAD[1] >= width or HEAD[1] < 0:
+        raise Exception("¡Perdiste! ¡Chocaste con la pared!")
         
 
 
@@ -106,19 +117,19 @@ while True:
             pygame.quit()
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            if event.key == K_LEFT:
+            if event.key == K_LEFT and not direction == 'right':
                 direction = 'left'
                 HEAD, BODY = naturalMove(HEAD, BODY)
                 HEAD = (HEAD[0], HEAD[1]-1)
-            elif event.key ==K_RIGHT:
+            elif event.key ==K_RIGHT and not direction == 'left':
                 direction = 'right'
                 HEAD, BODY = naturalMove(HEAD, BODY)
                 HEAD = (HEAD[0], HEAD[1]+1)
-            elif event.key ==K_UP:
+            elif event.key ==K_UP and not direction == 'down':
                 direction = 'up'
                 HEAD, BODY = naturalMove(HEAD, BODY)
                 HEAD = (HEAD[0]-1, HEAD[1])
-            elif event.key ==K_DOWN:
+            elif event.key ==K_DOWN and not direction == 'up':
                 direction = 'down'
                 HEAD, BODY = naturalMove(HEAD, BODY)
                 HEAD = (HEAD[0]+1, HEAD[1])
@@ -126,9 +137,11 @@ while True:
     defGrid()
     SCREEN = screen()
     SCREEN.fill(BLACK)
+    boundaries()
     food()
     scoreboard()
     drawSnake()
     drawGrid()
 
     pygame.display.update()
+    fpsClock.tick(FPS)
