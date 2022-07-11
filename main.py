@@ -1,4 +1,4 @@
-import pygame, sys, numpy as np, random
+import pygame, sys, numpy as np, random, math
 from pygame.locals import *
 
 pygame.init()
@@ -6,14 +6,14 @@ pygame.init()
 #Parámetros de grilla
 blockSize = 10 
 MARGIN = 0
-height = 30 
+height = 30
 width = 60
 
 #Parámetros de juego
-FPS = 20
+FPS = 25
 fpsClock = pygame.time.Clock()
 grid = []
-HEAD = (15, 30)
+HEAD = ((math.trunc(height/2), math.trunc(width/2)))
 BODY = [(HEAD[0], HEAD[1]-1), (HEAD[0], HEAD[1]-2), (HEAD[0], HEAD[1]-3), (HEAD[0], HEAD[1]-4), (HEAD[0], HEAD[1]-5)]
 TAIL = ()
 FOOD = ()
@@ -60,6 +60,7 @@ def drawGrid():
                               blockSize,
                               blockSize])
 
+#Escribe a snake dentro del grid
 def drawSnake():
     try:
         global grid
@@ -69,7 +70,8 @@ def drawSnake():
     except:
         pass
 
-def naturalMove(HEAD, BODY):
+#Mueve el cuerpo de snake. Elimina el último elemento.
+def bodyMove(HEAD, BODY):
     global TAIL
     TAIL = BODY[len(BODY)-1]
     varBODY = []
@@ -83,15 +85,19 @@ def food():
     global FOOD
     global score
     if food_status == 1:
-        FOOD = (random.randint(0, height-1), random.randint(0, width-1))
-        grid[FOOD[0], FOOD[1]] = 2
-        food_status = 0
+        while True:
+            FOOD = (random.randint(0, height-1), random.randint(0, width-1))
+            if grid[FOOD[0]][FOOD[1]] == 0:
+                grid[FOOD[0], FOOD[1]] = 2
+                food_status = 0
+                break
     else:
         grid[FOOD[0], FOOD[1]] = 2
     if HEAD == FOOD:
         food_status = 1
         BODY.append(TAIL)
         score += 1
+        food()
 
 def scoreboard():
     global score
@@ -102,11 +108,26 @@ def scoreboard():
 def boundaries():
     for elements in BODY:
         if HEAD == elements:
-            raise Exception("¡Perdiste! ¡Chocaste contigo mismo!")
+            #raise Exception("¡Perdiste! ¡Chocaste contigo mismo!")
+            print("Chochaste")
     
     if HEAD[0] >= height or HEAD[0] < 0 or HEAD[1] >= width or HEAD[1] < 0:
         raise Exception("¡Perdiste! ¡Chocaste con la pared!")
-        
+
+#Ejecuta el movimiento
+def loopMove():
+    global HEAD
+    global BODY
+    HEAD, BODY = bodyMove(HEAD, BODY)
+    if direction == 'left':
+        HEAD = (HEAD[0], HEAD[1]-1)
+    elif direction == 'right':
+        HEAD = (HEAD[0], HEAD[1]+1)
+    elif direction == 'up':
+        HEAD = (HEAD[0]-1, HEAD[1])
+    elif direction == 'down':
+        HEAD = (HEAD[0]+1, HEAD[1])
+    print('HEAD: ', HEAD, 'BODY: ', BODY)
 
 
 
@@ -117,30 +138,23 @@ while True:
             pygame.quit()
             sys.exit()
         elif event.type == pygame.KEYDOWN:
-            if event.key == K_LEFT and not direction == 'right':
+            if event.key == K_LEFT and not direction == 'right' and not direction == 'left':
                 direction = 'left'
-                HEAD, BODY = naturalMove(HEAD, BODY)
-                HEAD = (HEAD[0], HEAD[1]-1)
-            elif event.key ==K_RIGHT and not direction == 'left':
+            elif event.key ==K_RIGHT and not direction == 'left' and not direction == 'right':
                 direction = 'right'
-                HEAD, BODY = naturalMove(HEAD, BODY)
-                HEAD = (HEAD[0], HEAD[1]+1)
-            elif event.key ==K_UP and not direction == 'down':
+            elif event.key ==K_UP and not direction == 'down' and not direction == 'up':
                 direction = 'up'
-                HEAD, BODY = naturalMove(HEAD, BODY)
-                HEAD = (HEAD[0]-1, HEAD[1])
-            elif event.key ==K_DOWN and not direction == 'up':
+            elif event.key ==K_DOWN and not direction == 'up' and not direction == 'down':
                 direction = 'down'
-                HEAD, BODY = naturalMove(HEAD, BODY)
-                HEAD = (HEAD[0]+1, HEAD[1])
-    
+
     defGrid()
     SCREEN = screen()
     SCREEN.fill(BLACK)
+    loopMove()
+    drawSnake()
     boundaries()
     food()
     scoreboard()
-    drawSnake()
     drawGrid()
 
     pygame.display.update()
