@@ -5,7 +5,7 @@ pygame.init()
 
 #Parámetros de grilla
 blockSize = 10 
-MARGIN = 1
+MARGIN = 0
 height = 30 
 width = 60
 
@@ -13,15 +13,18 @@ width = 60
 grid = []
 HEAD = (15, 30)
 BODY = [(HEAD[0], HEAD[1]-1), (HEAD[0], HEAD[1]-2), (HEAD[0], HEAD[1]-3), (HEAD[0], HEAD[1]-4), (HEAD[0], HEAD[1]-5)]
+TAIL = ()
 FOOD = ()
 direction = 'right'
 food_status = 1
+score = 0
 
 #Colores
 WHITE = pygame.Color(255,255,255)
 RED = pygame.Color(255,0,0)
 BLACK = pygame.Color(0,0,0)
-GREEN = pygame.Color(155,102,75)
+BROWN = pygame.Color(155,102,75)
+LIGHT_WHITE = pygame.Color(245,232,255)
 
 def defGrid():
     global grid
@@ -33,8 +36,8 @@ def defGrid():
         grid.append(rowlist)
     grid = np.array(grid)
 
-    #Parámetros de pantalla
-    WINDOW_HEIGHT = (blockSize + MARGIN) * height + MARGIN #alto
+def screen():
+    WINDOW_HEIGHT = (blockSize + MARGIN) * height + MARGIN + 25 #alto
     WINDOW_WIDTH = (blockSize + MARGIN) * width + MARGIN #ancho
     SCREEN = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Snake")
@@ -45,7 +48,7 @@ def drawGrid():
         for column in range(width):
             color = WHITE
             if grid[row][column] == 1:
-                color = GREEN
+                color = BROWN
             if grid[row][column] == 2:
                 color = RED
             pygame.draw.rect(SCREEN,
@@ -62,6 +65,8 @@ def drawSnake():
         grid[element[0]][element[1]] = 1
 
 def naturalMove(HEAD, BODY):
+    global TAIL
+    TAIL = BODY[len(BODY)-1]
     varBODY = []
     varBODY.append(HEAD)
     for element in BODY[0:(len(BODY)-1)]:
@@ -71,12 +76,26 @@ def naturalMove(HEAD, BODY):
 def food():
     global food_status
     global FOOD
+    global score
     if food_status == 1:
         FOOD = (random.randint(0, height-1), random.randint(0, width-1))
         grid[FOOD[0], FOOD[1]] = 2
         food_status = 0
     else:
         grid[FOOD[0], FOOD[1]] = 2
+    if HEAD == FOOD:
+        food_status = 1
+        BODY.append(TAIL)
+        score += 1
+
+def scoreboard():
+    global score
+    font = pygame.font.SysFont(None,30)
+    img = font.render('Score: {0}'.format(score), True, RED)
+    SCREEN.blit(img, (3, ((blockSize + MARGIN) * height + MARGIN)+3))
+        
+        
+        
 
 
 
@@ -104,9 +123,11 @@ while True:
                 HEAD, BODY = naturalMove(HEAD, BODY)
                 HEAD = (HEAD[0]+1, HEAD[1])
     
-    SCREEN = defGrid()
+    defGrid()
+    SCREEN = screen()
     SCREEN.fill(BLACK)
     food()
+    scoreboard()
     drawSnake()
     drawGrid()
 
