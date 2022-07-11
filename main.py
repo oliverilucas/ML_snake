@@ -70,7 +70,6 @@ def drawSnake():
     except:
         pass
 
-#Mueve el cuerpo de snake. Elimina el último elemento.
 def bodyMove(HEAD, BODY):
     global TAIL
     TAIL = BODY[len(BODY)-1]
@@ -108,13 +107,10 @@ def scoreboard():
 def boundaries():
     for elements in BODY:
         if HEAD == elements:
-            #raise Exception("¡Perdiste! ¡Chocaste contigo mismo!")
-            print("Chochaste")
-    
+            quit()
     if HEAD[0] >= height or HEAD[0] < 0 or HEAD[1] >= width or HEAD[1] < 0:
-        raise Exception("¡Perdiste! ¡Chocaste con la pared!")
+        quit()
 
-#Ejecuta el movimiento
 def loopMove():
     global HEAD
     global BODY
@@ -127,16 +123,16 @@ def loopMove():
         HEAD = (HEAD[0]-1, HEAD[1])
     elif direction == 'down':
         HEAD = (HEAD[0]+1, HEAD[1])
-    print('HEAD: ', HEAD, 'BODY: ', BODY)
 
-
+def quit():
+    pygame.quit()
+    sys.exit()
 
 # -------------- Main Program Loop -------------- 
 while True:
     for event in pygame.event.get():
         if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
+            quit()
         elif event.type == pygame.KEYDOWN:
             if event.key == K_LEFT and not direction == 'right' and not direction == 'left':
                 direction = 'left'
